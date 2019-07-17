@@ -69,6 +69,10 @@ export default class StartServerPlugin {
     return signal;
   }
 
+  _getCwd() {
+    return this.options.cwd;
+  }
+
   afterEmit(compilation, callback) {
     if (this.worker && this.worker.isConnected()) {
       const signal = this._getSignal();
@@ -126,6 +130,7 @@ export default class StartServerPlugin {
   _startServer(callback) {
     const execArgv = this._getArgs();
     const inspectPort = this._getInspectPort(execArgv);
+    const cwd = this._getCwd();
 
     const clusterOptions = {
       exec: this._entryPoint,
@@ -135,6 +140,11 @@ export default class StartServerPlugin {
     if (inspectPort) {
       clusterOptions.inspectPort = inspectPort;
     }
+
+    if (cwd) {
+      clusterOptions.cwd = cwd;
+    }
+
     cluster.setupMaster(clusterOptions);
 
     cluster.on('online', worker => {
